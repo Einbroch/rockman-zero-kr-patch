@@ -1,0 +1,21 @@
+# 롬·세이브·상태·배포물은 저장소에 넣지 않는다 (배포 zip 은 GitHub 릴리즈로)
+*.gba
+*.sav
+*.ss1
+*.mss
+*.zip
+*.ips
+*.xdelta
+/roms/
+/dist/
+/scratch/
+*/out/
+__pycache__/
+
+# 원문 덤프(롬에서 다시 만든다)·작업용 중간 파일
+/ref/
+rz1/script_jp.json
+rz1/script_jp.txt
+rz1/kr_ocr_guess.json
+rz1/*_raw.json
+rz1/dump_kr_raw.py
