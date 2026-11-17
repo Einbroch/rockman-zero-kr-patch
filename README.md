@@ -11,7 +11,7 @@ GBA 「ロックマンゼロ」 1~4편(일본판) 한글패치 작업 폴더.
 | 편 | 판 | 원본 롬(일본판) | 원본 CRC32 | 결과 CRC32 |
 |---|---|---|---|---|
 | 록맨 제로 | v0.9.3 | `Rockman Zero (Japan).gba` (8MB) | `FF2A67B1` | `6F1B94F2` |
-| 록맨 제로 2 | v0.9.3 | `Rockman Zero 2 (Japan).gba` (8MB) | `9B5C8A4C` | `AA8AF792` |
+| 록맨 제로 2 | v0.9.4 | `Rockman Zero 2 (Japan).gba` (8MB) | `9B5C8A4C` | `F42CFC47` |
 | 록맨 제로 3 | v0.9.0 | `Rockman Zero 3 (Japan).gba` (8MB) | `5A2C41A9` | `59EA6F46` |
 | 록맨 제로 4 | v0.9.1 | `Rockman Zero 4 (Japan).gba` (16MB) | `ECE42D0E` | `1AA0B868` |
 

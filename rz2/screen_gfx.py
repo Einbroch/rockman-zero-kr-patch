@@ -17,9 +17,11 @@ def strip(first, last, text, colors, align='left'):
 
 
 def button(first, text):
+    # 원문 글자는 5~12행, 위 테두리는 1~3행. 띠를 2~11로 잡으면 테두리가 지워지고 12행 글자 끝이 남는다
+    # (상태 창 「옵션」「상태」 밑 점선 잔상) → 4~12행만 지우고 그 안에 9px 글자를 그린다.
     return dict(
         grid=[list(range(first, first + 5)), list(range(first + 0x20, first + 0x25))],
-        band=(2, 11), text=text, colors=(10, 3, 10), font='Galmuri9', height=9, dy=1,
+        band=(4, 12), text=text, colors=(10, 3, 10), font='Galmuri9', height=9, dy=0,
     )
 
 

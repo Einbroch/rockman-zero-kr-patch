@@ -141,3 +141,9 @@ Claude 작업에서 정한 일본판 기준 새 번역과 대사 12px 가변폭 
   - 이 수정은 v0.9.0 배포본에 없다(현재 `rz4/out/rz4_v090.gba` 는 수정 반영본, CRC32 056DF36D, 표식은 아직 v0.9.0).
 - (11/15) **4편 시험판 v0.9.1** `dist/RockmanZero4_KR_v0.9.1.zip`(SHA-256 `31fa76cd20389ce4fc73471170a9fcbcbc29cb70af0f4ef3e80612923045c0e6`, 내용물 `dist/rz4/` — v0.9.0 패치 파일은 v0.9.0 zip 에만 남김): 일본판 `ECE42D0E` → 16MiB, CRC32 `1AA0B868`, SHA-1 `a8f31d980f9f7850512d83449d1e567cb8f72755`. IPS 3065레코드(mkips 재적용 검증)·xdelta 재적용 바이트 일치. 롬 표식 `RZ4 KR PATCH v0.9.1`, 빌드 `rz4/out/rz4_v091.gba` — Mesen 으로 결과 화면을 확인한 빌드(CRC32 056DF36D)와 표식 1바이트만 다름. v0.9.0 대비 고친 것: 결과 화면 코드네임 둘째 사본, 웨더 레벨 값 「보통/쉬움」.
 - (11/15) **GitHub 공개**: `Einbroch/rockman-zero-kr-patch`(공개, 시리즈 저장소 하나). 커밋 14176d5 — rz1~rz4 빌드·번역 원고·tools·갈무리 BDF·README·이 문서. 롬·`ref/`(원문 덤프)·`dist/`·`scratch/`·`*/out/`·IPS 는 `.gitignore`. 작성자는 noreply 주소(저장소 로컬 설정). 프리릴리즈 4개(태그 `rz1-v0.9.3`, `rz2-v0.9.3`, `rz3-v0.9.0`, `rz4-v0.9.1`), 본문 = 각 zip 의 읽어주세요 + SHA-256; 내려받아 로컬 zip 과 바이트 일치 확인.
+
+## 2편 상태 창 버튼 잔상 수정 (11/17, 컬렉션 작업 중 발견)
+
+- 주황판 상태 창 「옵션」「상태」 버튼(`rz2/screen_gfx.button`, 타일 0x1D8·0x3C3)의 지우는 띠가 2~11행이라 원문 글자 12행이 점선처럼 남고 위 테두리(1~3행)가 지워져 있었다. v0.9.3 배포판에도 있다.
+- 띠를 4~12행, dy 0 으로 고쳐 `python rz2/build_dialogue.py --screens` 재빌드: v0.9.3 산출물과 다른 곳은 그 버튼 타일 20개뿐(압축 데이터 구간 밖 바이트 차이 0).
+- 시험판 `dist/RockmanZero2_KR_v0.9.4.zip`(SHA-256 `5e0b76856a4ed97d5f8a8e649becd88739d9218ab63b0789c612be3b8e915ad1`, 내용물 `dist/rz2/` — v0.9.3 패치 파일은 v0.9.3 zip 에만 남김): 일본판 `9B5C8A4C` → 16MiB, CRC32 `F42CFC47`, SHA-1 `91c40c311bd390a643402f044eae2a8ba7e4db3c`. IPS 1387레코드(mkips 재적용 검증)·xdelta(pyxdelta) 재적용 바이트 일치. 롬 표식 `RZ2 KR PATCH v0.9.4`. Eden(스위치 컬렉션)에서 같은 타일로 수정 확인.
