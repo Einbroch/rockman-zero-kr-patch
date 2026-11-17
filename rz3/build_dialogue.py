@@ -191,7 +191,7 @@ def main(out):
     marker_at = EXPANSION + 0x800
     glyph_table = EXPANSION + 0x1000
     glyph_data = glyph_table + len(table)
-    write(marker_at, b'RZ3 KR PATCH v0.9.0', 'marker')
+    write(marker_at, b'RZ3 KR PATCH v0.9.1', 'marker')
     write(glyph_table, table, 'glyph table')
     write(glyph_data, quanta, 'glyph quanta')
 

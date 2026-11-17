@@ -40,6 +40,8 @@ GROUPS = [
 # 화면 실측으로 정한 개별 한도(px). 없으면 묶음 한도.
 # 엘프 이름 칸: 일본어 최대 5자(40px)지만 2편과 같은 화면 배치라 48px(한글 4자)로 둔다 — 실기 확인 필요
 ID_LIMITS = {i: 48 for i in range(0x04C, 0x0AF)}
+# 엘프 목록 오른쪽 설명 칸: 안쪽 폭 약 100px(컬렉션 실측, 일본어 최대 88px) — 「지금 새틀라이트1에」(108px)가 상자에 걸렸다
+ID_LIMITS.update({i: 96 for i in (0x0B1, 0x0B2, 0x0B3, 0x0B5, 0x0B6, 0x0B7, 0x0C3, 0x0C4)})
 
 
 def width(line):
