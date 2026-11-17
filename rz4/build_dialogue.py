@@ -27,6 +27,7 @@ from dump_sequel_text import TITLES, bank_ranges, load_map, read_message
 import build as rz1   # parse_txt
 import rz4_system_text as system_text
 import pause4_gfx
+import database4_gfx
 import title_prompt4
 import gameover4
 import logo4
@@ -219,7 +220,7 @@ def main(out):
         scanners = scanners.replace(old, new)
     program = renderer + '\n' + scanners + '\n' + rz3.SHIM
     base = ROM_BASE + CODE_AT
-    marker = b'RZ4 KR PATCH v0.9.2'
+    marker = b'RZ4 KR PATCH v0.9.3'
     # 코드 -> 표식 -> 글리프 표 순으로 구간 밖 조각에, 글리프 조각(quanta)은 구간 안 빈 덩어리에 둔다.
     # 한글 데이터 빈 구간: 번역 중엔 빈 덩어리만, 전체 모드에선 옛 대사 자리도 쓴다(사이 데이터는 건너뜀).
     free = [list(WINDOW_PARTIAL)] if klo == WINDOW_PARTIAL[0] else [list(DIALOGUE_SPAN), list(WINDOW_PARTIAL)]
@@ -304,6 +305,7 @@ def main(out):
     if any(ROM_BASE + a < ROM_BASE + klo or b > khi for a, b in free):
         raise ValueError('allocator left the Korean window')
     pause4_gfx.apply(source, write)   # 서브 화면·타이틀 메뉴 그림 글자(무압축 타일, 제자리)
+    database4_gfx.apply(source, write)   # 데이터베이스 탭·아래 안내 줄(무압축 타일, 제자리)
     if set(source[title_prompt4.TARGET:title_prompt4.TARGET + 0x428C]) != {0xFF}:
         raise ValueError('title prompt target area is not free')
     title_prompt4.apply(source, write)   # 시작 안내(압축 묶음을 빈 조각으로 옮김)
