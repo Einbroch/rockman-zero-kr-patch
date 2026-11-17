@@ -12,7 +12,7 @@ GBA 「ロックマンゼロ」 1~4편(일본판) 한글패치 작업 폴더.
 |---|---|---|---|---|
 | 록맨 제로 | v0.9.3 | `Rockman Zero (Japan).gba` (8MB) | `FF2A67B1` | `6F1B94F2` |
 | 록맨 제로 2 | v0.9.4 | `Rockman Zero 2 (Japan).gba` (8MB) | `9B5C8A4C` | `F42CFC47` |
-| 록맨 제로 3 | v0.9.1 | `Rockman Zero 3 (Japan).gba` (8MB) | `5A2C41A9` | `7D3F9A01` |
+| 록맨 제로 3 | v0.9.2 | `Rockman Zero 3 (Japan).gba` (8MB) | `5A2C41A9` | `CBD4F8C7` |
 | 록맨 제로 4 | v0.9.1 | `Rockman Zero 4 (Japan).gba` (16MB) | `ECE42D0E` | `1AA0B868` |
 
 패치 결과는 모두 16MB 다. 각 zip 의 `읽어주세요.txt` 에 적용 방법·들어간 것·확인한 곳이 있다.

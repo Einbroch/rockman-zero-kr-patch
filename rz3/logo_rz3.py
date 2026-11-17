@@ -27,11 +27,13 @@ SPEC = dict(
 )
 
 
-def apply(source, write):
+def korean(source):
+    """-> (일본어 타일, 한국어 타일, 맵 u16 목록(32열), 일본어 ® x 범위, 한국어 ® x 범위)"""
     relative, size, layout = struct.unpack_from('<III', source, DESCRIPTOR)
     tiles, consumed = lz77.decompress(source, DESCRIPTOR + relative)
     if len(tiles) != 18880 or consumed > size & 0x3FFFFF:
         raise ValueError('unexpected RZ3 logo tileset')
+    jp = bytes(tiles)
     tiles = bytearray(tiles)
     rows = [struct.unpack_from('<30H', source, MAP + y * 60) for y in range(20)]
     entries = [row[x] if x < 30 else 0 for row in rows for x in range(32)]
@@ -45,7 +47,15 @@ def apply(source, write):
     def put(x, y, v):
         tiles[at(x, y)] = v
     TL.redraw(SPEC, entries, lambda x, y: tiles[at(x, y)], put)
-    packed = lz77.compress(bytes(tiles))
+    rx0, _, rx1, _ = SPEC['registered']
+    reg_x = TL.registered_x(SPEC)
+    return jp, bytes(tiles), entries, (rx0, rx1), (reg_x, reg_x + rx1 - rx0)
+
+
+def apply(source, write):
+    relative, size, layout = struct.unpack_from('<III', source, DESCRIPTOR)
+    _, tiles, _, _, _ = korean(source)
+    packed = lz77.compress(tiles)
     if lz77.decompress(packed)[0] != tiles:
         raise ValueError('RZ3 logo tileset failed readback')
     write(TARGET, packed, 'RZ3 logo tiles')

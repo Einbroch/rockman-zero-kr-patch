@@ -27,6 +27,7 @@ from dump_sequel_text import TITLES, bank_ranges, load_map, read_message
 import build as rz1   # parse_txt
 import screen_text   # rz3/screen_text.py (sys.path 맨 앞이 rz3)
 import logo_rz3
+import logo_strip_rz3
 import title_prompt
 import scroll
 import pause3_gfx
@@ -191,7 +192,7 @@ def main(out):
     marker_at = EXPANSION + 0x800
     glyph_table = EXPANSION + 0x1000
     glyph_data = glyph_table + len(table)
-    write(marker_at, b'RZ3 KR PATCH v0.9.1', 'marker')
+    write(marker_at, b'RZ3 KR PATCH v0.9.2', 'marker')
     write(glyph_table, table, 'glyph table')
     write(glyph_data, quanta, 'glyph quanta')
 
@@ -273,6 +274,7 @@ def main(out):
 
     system_slots = screen_text.apply(source, write, lambda text: encode(text, codes))
     logo_rz3.apply(source, write)   # 타이틀 로고 「록맨®제로」
+    logo_strip_rz3.apply(source, write)   # 로고 등장 연출의 글자 띠(스프라이트)
     title_prompt.apply(source, write)   # 시작 안내
     scroll.apply(source, write, asm)   # 오프닝 스크롤(줄 타일 슬롯)
     pause3_gfx.apply(source, write)   # 서브 화면 그림 글자

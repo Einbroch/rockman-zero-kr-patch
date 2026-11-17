@@ -17,18 +17,27 @@ def widen(bm, factor):
     return [[row[int(x / factor)] for x in range(n)] for row in bm]
 
 
+def words(spec):
+    return (widen(LG.word([LG.rok(), LG.maen()], 2), spec['widen']),
+            widen(LG.word([LG.je(), LG.ro()], 2), spec['widen']))
+
+
+def registered_x(spec):
+    """다시 그린 로고에서 ® 의 왼쪽 x"""
+    return spec['x1'] + len(words(spec)[0][0]) + spec.get('reg_gap', 3)
+
+
 def redraw(spec, entries, get, put):
     """spec: y0,y1, left(y), right(y), plate, outline, blue, orange, registered(x0,y0,x1,y1),
     top, widen, slant, x1. entries: 맵 u16 목록(32열). 바꾼 픽셀이 쓰는 타일 번호 집합을 돌려준다."""
     y0, y1 = spec['y0'], spec['y1']
     rx0, ry0, rx1, ry1 = spec['registered']
     reg = [[get(x, y) for x in range(rx0, rx1 + 1)] for y in range(ry0, ry1 + 1)]
-    words = (widen(LG.word([LG.rok(), LG.maen()], 2), spec['widen']),
-             widen(LG.word([LG.je(), LG.ro()], 2), spec['widen']))
-    reg_x = spec['x1'] + len(words[0][0]) + spec.get('reg_gap', 3)
+    words_ = words(spec)
+    reg_x = registered_x(spec)
     starts = (spec['x1'], reg_x + len(reg[0]) + 4)
     ink = {}
-    for bm, x0, grad in zip(words, starts, (spec['blue'], spec['orange'])):
+    for bm, x0, grad in zip(words_, starts, (spec['blue'], spec['orange'])):
         h = len(bm)
         for y, row in enumerate(bm):
             shift = round((h - 1 - y) * spec['slant'])
