@@ -42,7 +42,43 @@ def render(glyphs, ch, cell_w=None):
                 X = x + xo
                 if 0 <= X < W and 0 <= y < 16:
                     px[y][X] = COLOR
+    if A_STUB_TALL and is_a_family(ch):
+        px = tall_a_stub(px)
     return W, px
+
+
+# ㅏ 꼭지 굵히기(11/18 사용자 요청): 갈무리11 의 ㅏ·ㅘ 꼭지는 1px 점이라 스위치 컬렉션의 확대·쌍선형 화면에서 ㅣ 로 읽힌다.
+# 꼭지 아래에 1px 을 더해 2px 높이로 만든다(옆으로 늘리면 다음 글자 첫 획에 붙는다).
+A_STUB_TALL = True
+
+
+def is_a_family(ch):
+    o = ord(ch) - 0xAC00
+    return 0 <= o < 11172 and (o // 28) % 21 in (0, 9)   # 중성 ㅏ·ㅘ
+
+
+def find_a_stub(px):
+    """오른쪽 세로획 x 와 꼭지 행 (꼭지 = 세로획 오른쪽 한 칸, 그 오른쪽은 빈 칸). 못 찾으면 None"""
+    H, W = len(px), len(px[0])
+    cols = [x for x in range(W) if sum(1 for y in range(H) if px[y][x]) >= 5]
+    if not cols:
+        return None
+    xs = max(cols)
+    rows = [y for y in range(H) if px[y][xs] and xs + 1 < W and px[y][xs + 1]
+            and not (xs + 2 < W and px[y][xs + 2])]
+    return (xs, rows[0]) if len(rows) == 1 else None
+
+
+def tall_a_stub(px):
+    hit = find_a_stub(px)
+    if hit is None:
+        raise ValueError('ㅏ 꼭지를 찾지 못함')
+    xs, r = hit
+    if not px[r + 1][xs] or px[r + 1][xs + 1]:
+        raise ValueError('ㅏ 꼭지 아래에 세로획이 없음')
+    px = [row[:] for row in px]
+    px[r + 1][xs + 1] = px[r][xs + 1]
+    return px
 
 
 def to_quanta(W, px):

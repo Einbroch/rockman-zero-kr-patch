@@ -137,7 +137,7 @@ def main(screens=False):
     marker_at = EXPANSION + 0x800
     glyph_table = EXPANSION + 0x1000
     glyph_data = glyph_table + len(table)
-    write(marker_at, b'RZ2 KR PATCH v0.9.4', 'marker')
+    write(marker_at, b'RZ2 KR PATCH v0.9.5', 'marker')
     write(glyph_table, table, 'glyph table')
     write(glyph_data, quanta, 'glyph quanta')
     renderer = make_renderer(expanded=True, screens=screens)

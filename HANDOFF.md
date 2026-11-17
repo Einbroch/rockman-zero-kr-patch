@@ -171,3 +171,13 @@ Claude 작업에서 정한 일본판 기준 새 번역과 대사 12px 가변폭 
 - (11/18) **3편 시험판 v0.9.2** `dist/RockmanZero3_KR_v0.9.2.zip`(SHA-256 `e93a8a6701ab4dd7ed6dd13f734d20d60076f6af9d21ea389f164267e24b46c0`, 내용물 `dist/rz3/`):
   일본판 `5A2C41A9` → 16MiB, CRC32 `CBD4F8C7`, SHA-1 `beb1c29a781623e04513570e6fd4104d24c23466`. IPS 1822레코드(mkips 재적용 검증)·xdelta(pyxdelta) 재적용 바이트 일치.
   롬 표식 `RZ3 KR PATCH v0.9.2`, 빌드 `rz3/out/rz3_v092.gba` — Mesen 으로 연출을 확인한 빌드(0EC09232)와 표식 1바이트만 다름.
+
+## ㅏ 꼭지 2px (11/18, 1편 v0.9.4·2편 v0.9.5·3편 v0.9.3·4편 v0.9.2 로 배포)
+- `tools/kfont.py` A_STUB_TALL: 갈무리11 의 ㅏ·ㅘ 꼭지(1px)를 아래로 1px 더해 2px 높이로. 스위치 컬렉션(확대·쌍선형)에서 ㅣ 로 읽힌다는 지적.
+  옆으로 늘리면 다음 글자 첫 획에 붙어 위아래로 늘림(사용자 선택). 폰트의 ㅏ·ㅘ 1,064자 전부 꼭지 검출 통과(못 찾으면 빌드 실패).
+- 1~4편 모두 이 렌더를 쓴다 → 네 편 재빌드 결과 이전 대비 글리프 데이터 131~151바이트만 다름. 배포:
+
+  - 1편 v0.9.4: `dist/RockmanZero1_KR_v0.9.4.zip` SHA-256 `3203089c6dde5d8a356bf80c7e15ee5e94834fddf973ac42a30c85844976638e`, 적용 결과 CRC32 `3448D640`, SHA-1 `35931f473372171671eee7468d547d2d52123957`, IPS 1278레코드·xdelta 재적용 일치, 확인 빌드와 표식만 다름(1편은 동일).
+  - 2편 v0.9.5: `dist/RockmanZero2_KR_v0.9.5.zip` SHA-256 `6fa801adf206fc3c8c3fcb751faf7b9ab88f488f36733a0fb90eb3e69a2b4a47`, 적용 결과 CRC32 `D17B1506`, SHA-1 `4aa37e36b001fa5297ab449d7ad153e2847027f7`, IPS 1387레코드·xdelta 재적용 일치, 확인 빌드와 표식만 다름(1편은 동일).
+  - 3편 v0.9.3: `dist/RockmanZero3_KR_v0.9.3.zip` SHA-256 `f4ae33d7bc7eaa95f853c0da7aa980eb2b964566bcf1a46894d2fc9a254e6e61`, 적용 결과 CRC32 `1602A150`, SHA-1 `9a2e334e19630c52454c6c840d0f346e21180b81`, IPS 1822레코드·xdelta 재적용 일치, 확인 빌드와 표식만 다름(1편은 동일).
+  - 4편 v0.9.2: `dist/RockmanZero4_KR_v0.9.2.zip` SHA-256 `d713c8b4c0e3b8b80aea4ccac3ff1db2c720b78b6cba4cbb7d5870e07de78735`, 적용 결과 CRC32 `57A75CEE`, SHA-1 `e14defb66c9d9b72ce250df61af4c07154f2a3a5`, IPS 3065레코드·xdelta 재적용 일치, 확인 빌드와 표식만 다름(1편은 동일).

@@ -219,7 +219,7 @@ def main(out):
         scanners = scanners.replace(old, new)
     program = renderer + '\n' + scanners + '\n' + rz3.SHIM
     base = ROM_BASE + CODE_AT
-    marker = b'RZ4 KR PATCH v0.9.1'
+    marker = b'RZ4 KR PATCH v0.9.2'
     # 코드 -> 표식 -> 글리프 표 순으로 구간 밖 조각에, 글리프 조각(quanta)은 구간 안 빈 덩어리에 둔다.
     # 한글 데이터 빈 구간: 번역 중엔 빈 덩어리만, 전체 모드에선 옛 대사 자리도 쓴다(사이 데이터는 건너뜀).
     free = [list(WINDOW_PARTIAL)] if klo == WINDOW_PARTIAL[0] else [list(DIALOGUE_SPAN), list(WINDOW_PARTIAL)]
