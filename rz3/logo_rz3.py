@@ -60,7 +60,8 @@ def hd_tiles(source):
     relative, size, layout = struct.unpack_from('<III', source, DESCRIPTOR)
     tiles = bytearray(lz77.decompress(source, DESCRIPTOR + relative)[0])
     rows = logo_hd.read_rows(source, MAP, 30, 20)
-    logo_hd.compose(3, tiles, rows, 0x100)
+    info = logo_hd.compose(3, tiles, rows, 0x100)
+    hd_tiles.info = info
     return bytes(tiles), rows
 
 

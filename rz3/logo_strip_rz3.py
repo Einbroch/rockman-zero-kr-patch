@@ -15,6 +15,8 @@ import struct
 import sys
 from collections import Counter
 
+from PIL import Image
+
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tools'))
 import lz77
 import logo_rz3
@@ -149,9 +151,95 @@ def build(source):
     return tiles, bytes(new), dict(pixels=len(want))
 
 
+HD = True        # 타이틀 로고가 사용자 HD 로고(logo_hd)이면 띠 글자도 그 글자로
+HD_MAX_CLIP = 0.01   # 스프라이트 빈틈에 걸려 버리는 글자 픽셀 비율 상한(띠 → 타이틀 사이에 흰 번쩍임이 있어 작은 차이는 안 보인다)
+
+
+def build_hd(source):
+    """HD 로고의 「록맨」「제로」 채움(바깥 남색 테 제외, 원래 띠처럼)을 타이틀 로고 글자 자리에 블록째 줄여 놓는다.
+    띠 스프라이트 영역(3,321px)이 원래 크기 글자보다 작고 빈틈이 있어 100% 로는 못 넣는다:
+    크기를 1% 씩 줄이며 두 낱말을 각각 ±6px 안에서 옮겨 잘림이 HD_MAX_CLIP 이하인 가장 큰 크기를 고른다(잘린 픽셀은 버림)."""
+    import numpy as np
+    from scipy import ndimage
+    import logo_hd
+    rel, size, layout = struct.unpack_from('<III', source, DESCRIPTOR)
+    tiles, used = lz77.decompress(source, DESCRIPTOR + rel)
+    if len(tiles) != TILES * 32 or used > size & 0x3FFFFF:
+        raise ValueError('unexpected RZ3 logo strip tileset')
+    logo_rz3.hd_tiles(source)
+    info = logo_rz3.hd_tiles.info
+    (OX, OY), (W0, H0) = info['offset'], info['size']
+    arr, fill = logo_hd.letters(3)
+    arr = arr.astype(int)
+    f0 = W0 / arr.shape[1]
+    A = arr[..., 3] >= 128
+    lab, n = ndimage.label(A, structure=np.ones((3, 3)))
+    sizes = ndimage.sum(A, lab, range(1, n + 1))
+    groups = [i + 1 for i in np.argsort(-sizes)[:2]]
+    ys, xs = np.nonzero(A)
+    bx, by = (xs.min() + xs.max()) / 2, (ys.min() + ys.max()) / 2
+    bcx, bcy = OX + bx * f0, OY + by * f0
+    owner = {}
+    for s in reversed(range(len(REST))):
+        for X, Y, t, x, y in cells(s):
+            owner[(X, Y)] = s
+    pal = struct.unpack_from('<16H', source, 0x61B11C)
+    rgb = [((c & 31) * 255 // 31, (c >> 5 & 31) * 255 // 31, (c >> 10 & 31) * 255 // 31) for c in pal]
+    chosen = None
+    for k in range(0, 31):
+        sc = 0.9 - k * 0.01
+        f = f0 * sc
+        placed, total, clip = [], 0, 0
+        for g in groups:
+            m = (lab == g) & fill
+            gy, gx = np.nonzero(m)
+            x0, x1, y0, y1 = gx.min(), gx.max(), gy.min(), gy.max()
+            sub = Image.fromarray(np.where(m[..., None], arr, 0).astype(np.uint8), 'RGBA').crop((x0, y0, x1 + 1, y1 + 1))
+            w, h = max(1, round(sub.width * f)), max(1, round(sub.height * f))
+            sm = np.asarray(sub.resize((w, h), Image.LANCZOS)).astype(int)
+            py, px = np.nonzero(sm[..., 3] >= 128)
+            tx, ty = bcx + (x0 - bx) * f, bcy + (y0 - by) * f
+            best = None
+            for dx in range(-6, 7):
+                for dy in range(-6, 7):
+                    ox, oy = round(tx) + dx, round(ty) + dy
+                    c = sum((x + ox, y + oy) not in owner for x, y in zip(px, py))
+                    key = (c, abs(dx) + abs(dy))
+                    if best is None or key < best[0]:
+                        best = (key, ox, oy)
+            total += len(px)
+            clip += best[0][0]
+            placed.append((sm, px, py, best[1], best[2]))
+        if clip <= total * HD_MAX_CLIP:
+            chosen = (sc, placed, total, clip)
+            break
+    if not chosen:
+        raise ValueError('RZ3 logo strip: HD letters do not fit the strip sprites')
+    sc, placed, total, clip = chosen
+    new = bytearray(tiles)
+    for s in range(len(REST)):
+        for X, Y, t, x, y in cells(s):
+            set_px(new, t, x, y, 0)
+    cache = {}
+    for sm, px, py, ox, oy in placed:
+        for x, y in zip(px, py):
+            X, Y = x + ox, y + oy
+            if (X, Y) not in owner:
+                continue
+            key = tuple(sm[y, x, :3])
+            if key not in cache:
+                r, g, b = key
+                cache[key] = min(range(1, 16), key=lambda i: (rgb[i][0] - r) ** 2 * 3 + (rgb[i][1] - g) ** 2 * 4 + (rgb[i][2] - b) ** 2 * 2)
+            x0, y0, w, h, t0 = REST[owner[(X, Y)]]
+            lx, ly = X - x0, Y - y0
+            set_px(new, t0 + (ly // 8) * (w // 8) + lx // 8, lx % 8, ly % 8, cache[key])
+    print(f'RZ3 logo strip HD: scale {sc:.2f}, {total} px, clipped {clip}')
+    return tiles, bytes(new), dict(pixels=total - clip, clipped=clip, scale=sc)
+
+
 def apply(source, write):
     rel, size, layout = struct.unpack_from('<III', source, DESCRIPTOR)
-    _, new, _ = build(source)
+    _, new, _ = build_hd(source) if HD else build(source)
     packed = lz77.compress(new)
     if lz77.decompress(packed)[0] != new:
         raise ValueError('RZ3 logo strip failed readback')

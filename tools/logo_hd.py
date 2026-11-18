@@ -150,3 +150,51 @@ def preview(n, tiles, rows, tile0, base=0, path=None):
     if path:
         im.resize((960, 416), Image.NEAREST).save(path)
     return im
+
+
+def letters(n, width=700):
+    """HD 로고에서 「록맨」「제로」 글자만 떼어 낸다(로고 등장 연출의 글자 띠용).
+    -> (RGBA 배열(width 폭, 글자 밖은 투명), 채움 마스크(바깥 남색 테 제외)).
+    글자 구조(실측): 바깥 남색 → 흰 테 → 안쪽 남색 → 흰 하이라이트 → 채움. 남색(밝기 < 45)을 벽으로 나눈 영역 중
+    「록맨」(왼쪽 파랑) 세로 범위 안에 들고 대부분 흰색이 아닌 것 = 글자. Z 의 영역은 범위를 벗어나 빠진다."""
+    import numpy as np
+    from collections import deque
+    from scipy import ndimage
+    a = art(n)
+    a = np.asarray(a.resize((width, round(a.height * width / a.width)), Image.LANCZOS)).astype(int)
+    H, W = a.shape[:2]
+    R, G, B, A = a[..., 0], a[..., 1], a[..., 2], a[..., 3]
+    mx = np.maximum(np.maximum(R, G), B)
+    mn = np.minimum(np.minimum(R, G), B)
+    lum = 0.3 * R + 0.59 * G + 0.11 * B
+    white = (A >= 128) & (mn > 190) & (mx - mn < 45)
+    navy = (A >= 128) & (lum < 45)
+    lab, k = ndimage.label(~(navy | (A < 128)))
+    comps = ndimage.find_objects(lab)
+    blue = B > R + 40
+    info = []
+    for i, sl in enumerate(comps, 1):
+        if sl is None:
+            continue
+        m = lab[sl] == i
+        cnt = int(m.sum())
+        info.append((i, cnt, sl[1].start, sl[1].stop - 1, sl[0].start, sl[0].stop - 1,
+                     blue[sl][m].mean(), white[sl][m].mean()))
+    bl = [c for c in info if c[1] > 40 and c[3] < W * 0.42 and c[6] > 0.6]
+    if not bl:
+        raise ValueError(f'RZ{n} logo letters: no blue word found')
+    y0 = min(c[4] for c in bl) - 30
+    y1 = max(c[5] for c in bl) + 12
+    keep_ids = [c[0] for c in info if c[1] > 20 and c[4] >= y0 and c[5] <= y1 and c[2] < W * 0.75
+                and c[5] - c[4] >= 3 and c[7] < 0.5]
+    keep = np.isin(lab, keep_ids)
+    # 왼쪽(「록맨」) 파랑 채움은 하이라이트와 이어져 빠질 수 있어 따로 더한다(뒤에 Z 가 없다)
+    yl = max(c[5] for c in bl)
+    left = np.zeros((H, W), bool)
+    left[y0:yl + 1, :int(W * 0.42)] = True
+    bluefill = blue & (lum >= 60) & ~white & (A >= 128)
+    fill = keep | (left & bluefill)
+    full = fill | (ndimage.binary_dilation(fill, iterations=3) & navy)
+    out = np.zeros_like(a)
+    out[full] = a[full]
+    return out.astype(np.uint8), fill
