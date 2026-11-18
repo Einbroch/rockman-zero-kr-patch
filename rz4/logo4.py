@@ -91,11 +91,30 @@ def grey(pal, i):
     return i == 0 or max(r, g, b) - min(r, g, b) < 60
 
 
+HD = True   # 사용자 제작 HD 로고(art/logo_hd/zero4.png)로 통째로
+
+
 def apply(rom, write):
     relative, size, layout = struct.unpack_from('<III', rom, DESCRIPTOR)
     tiles = bytearray(lz77.decompress(rom, DESCRIPTOR + relative)[0])
     if len(tiles) != 0x8000:
         raise ValueError('unexpected RZ4 logo tileset')
+    if HD:
+        import logo_hd
+        original = bytes(tiles)
+        rows = logo_hd.read_rows(rom, MAP, 32, 20)
+        extra = struct.unpack_from('<384H', rom, MAP + 20 * 64)   # 20행 뒤(화면 밖)도 같은 타일을 쓰는지 센다
+        logo_hd.compose(4, tiles, rows, 0x100, extra=extra)
+        packed = lz77.compress(bytes(tiles))
+        if lz77.decompress(packed)[0] != tiles:
+            raise ValueError('RZ4 logo tileset failed readback')
+        if len(packed) > ROOM or set(rom[TARGET:TARGET + ROOM]) != {0xFF}:
+            raise ValueError(f'RZ4 logo does not fit its free area ({len(packed)} > {ROOM})')
+        write(TARGET, packed, 'RZ4 logo tiles')
+        write(DESCRIPTOR, struct.pack('<III', TARGET - DESCRIPTOR, (size & ~0x3FFFFF) | len(packed), layout),
+              'RZ4 logo descriptor')
+        write(MAP, logo_hd.pack_rows(rows), 'RZ4 title logo map')
+        return original, bytes(tiles), [e for r in rows for e in r]
     pal = rom[PALETTE:PALETTE + 0x200]
     entries = [struct.unpack_from('<H', rom, MAP + i * 2)[0] for i in range(32 * 20)]
     uses = {}

@@ -183,7 +183,7 @@ def apply_title_prompt(source, write):
         for row in pixels[top:top + 8] for color in row[x:x + 8]
     )
     raw = original[:start] + tiles + original[end:]
-    raw = logo_rz2.apply(raw, source)   # 「록맨®제로」 로고 (같은 타일셋)
+    raw = logo_rz2.apply(raw, source, write)   # 「록맨 제로」 로고 (같은 타일셋, 맵은 write)
     packed = lz77.compress(raw)
     if lz77.decompress(packed)[0] != raw:
         raise ValueError('title graphics failed decompression readback')

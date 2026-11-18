@@ -52,9 +52,26 @@ def korean(source):
     return jp, bytes(tiles), entries, (rx0, rx1), (reg_x, reg_x + rx1 - rx0)
 
 
+HD = True   # 사용자 제작 HD 로고(art/logo_hd/zero3.png)로 통째로 (korean() 은 로고 등장 띠의 위치 대조용으로 남긴다)
+
+
+def hd_tiles(source):
+    import logo_hd
+    relative, size, layout = struct.unpack_from('<III', source, DESCRIPTOR)
+    tiles = bytearray(lz77.decompress(source, DESCRIPTOR + relative)[0])
+    rows = logo_hd.read_rows(source, MAP, 30, 20)
+    logo_hd.compose(3, tiles, rows, 0x100)
+    return bytes(tiles), rows
+
+
 def apply(source, write):
     relative, size, layout = struct.unpack_from('<III', source, DESCRIPTOR)
-    _, tiles, _, _, _ = korean(source)
+    if HD:
+        import logo_hd
+        tiles, rows = hd_tiles(source)
+        write(MAP, logo_hd.pack_rows(rows), 'RZ3 title logo map')
+    else:
+        _, tiles, _, _, _ = korean(source)
     packed = lz77.compress(tiles)
     if lz77.decompress(packed)[0] != tiles:
         raise ValueError('RZ3 logo tileset failed readback')

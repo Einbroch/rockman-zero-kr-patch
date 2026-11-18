@@ -20,7 +20,24 @@ SPEC = dict(
 )
 
 
-def apply(raw, source):
+HD = True   # 사용자 제작 HD 로고(art/logo_hd/zero2.png)로 통째로
+
+
+def apply(raw, source, write=None):
+    if HD:
+        import logo_hd
+        raw = bytearray(raw)
+        rows = logo_hd.read_rows(source, MAP, 32, 32)
+        extra = struct.unpack_from('<1024H', source, MAP + 0x800)   # 두 번째 블록(메뉴 화면)도 같은 타일을 쓴다
+        logo_hd.compose(2, raw, rows, 0, extra=extra)
+        if write is None:
+            raise ValueError('RZ2 HD logo needs write for the map')
+        write(MAP, logo_hd.pack_rows(rows), 'RZ2 title logo map')
+        return bytes(raw)
+    return apply_band(raw, source)
+
+
+def apply_band(raw, source):
     raw = bytearray(raw)
     entries = struct.unpack_from('<1024H', source, MAP)
     at = lambda x, y: (entries[(y // 8) * 32 + x // 8] & 0x3FF) * 64 + (y % 8) * 8 + x % 8

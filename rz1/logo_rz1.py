@@ -22,7 +22,25 @@ SPEC = dict(
 )
 
 
+TILES_END = 0x2F5B54
+HD = True   # 사용자 제작 HD 로고(art/logo_hd/zero1.png)로 통째로
+
+
 def apply(rom, source):
+    if HD:
+        import logo_hd
+        tiles = bytearray(source[TILES:TILES_END])
+        rows = logo_hd.read_rows(source, MAP, 32, 32)
+        info = logo_hd.compose(1, tiles, rows, 0)
+        for a, b, new in ((TILES, TILES_END, bytes(tiles)), (MAP, MAP + 0x800, logo_hd.pack_rows(rows))):
+            if rom[a:b] != source[a:b]:
+                raise ValueError('title logo overlaps another build write')
+            rom[a:b] = new
+        return info['tiles']
+    return apply_band(rom, source)
+
+
+def apply_band(rom, source):
     entries = struct.unpack_from('<1024H', source, MAP)
     at = lambda x, y: TILES + (entries[(y // 8) * 32 + x // 8] & 0x3FF) * 64 + (y % 8) * 8 + x % 8
     changed = {}
